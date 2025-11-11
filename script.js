@@ -8,7 +8,8 @@ const cryptoMap = {
     'litecoin': { symbol: 'LTC', name: 'Litecoin' },
     'tron': { symbol: 'TRX', name: 'Tron' },
     'dash': { symbol: 'DASH', name: 'Dash' },
-    'tellor': { symbol: 'TRB', name: 'Tellor' }
+    'tellor': { symbol: 'TRB', name: 'Tellor' },
+    'crypto-com-chain': { symbol: 'CRO', name: 'Cronos' }
 };
 
 let currentPrice = 0;
