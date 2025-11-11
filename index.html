@@ -26,39 +26,75 @@
             </div>
 
             <div class="input-group">
-                <label for="hargaBeli">Harga Beli (USD):</label>
+                <label for="hargaBeli">Harga Beli per Koin (USD):</label>
                 <input type="number" id="hargaBeli" placeholder="Masukkan harga beli per koin">
             </div>
 
             <div class="input-group">
-                <label for="hargaSekarang">Harga Sekarang (USD):</label>
+                <label for="hargaSekarang">Harga Sekarang per Koin (USD):</label>
                 <input type="number" id="hargaSekarang" placeholder="Masukkan harga realtime">
             </div>
 
-            <div class="input-group">
-                <label for="jumlahKoin">Jumlah Koin:</label>
-                <input type="number" id="jumlahKoin" placeholder="Masukkan jumlah koin" step="0.00000001">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="jumlahKoin">Jumlah Koin:</label>
+                    <input type="number" id="jumlahKoin" placeholder="Jumlah koin" step="0.00000001">
+                </div>
+                
+                <div class="separator">ATAU</div>
+                
+                <div class="input-group">
+                    <label for="jumlahUSD">Jumlah Investasi (USD):</label>
+                    <input type="number" id="jumlahUSD" placeholder="Jumlah USD">
+                </div>
+            </div>
+
+            <div class="conversion-info">
+                <small>💡 Isi salah satu: Jumlah Koin ATAU Jumlah USD</small>
             </div>
 
             <button onclick="hitungProfit()">Hitung Profit/Loss</button>
+            <button onclick="resetForm()" class="reset-btn">Reset</button>
 
             <div id="hasil" class="result hidden">
-                <h3>Hasil Perhitungan:</h3>
-                <div class="result-item">
-                    <span>Profit/Loss Percentage:</span>
-                    <span id="profitPercentage">0%</span>
+                <h3>📊 Hasil Perhitungan:</h3>
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h4>Profit/Loss Percentage</h4>
+                        <span id="profitPercentage" class="value">0%</span>
+                    </div>
+                    <div class="result-card">
+                        <h4>Profit/Loss Nominal</h4>
+                        <span id="profitNominal" class="value">$0</span>
+                    </div>
+                    <div class="result-card">
+                        <h4>Total Nilai Sekarang</h4>
+                        <span id="totalNilai" class="value">$0</span>
+                    </div>
+                    <div class="result-card">
+                        <h4>Status</h4>
+                        <span id="status" class="value">-</span>
+                    </div>
                 </div>
-                <div class="result-item">
-                    <span>Profit/Loss Nominal:</span>
-                    <span id="profitNominal">$0</span>
-                </div>
-                <div class="result-item">
-                    <span>Total Nilai Investasi:</span>
-                    <span id="totalNilai">$0</span>
-                </div>
-                <div class="result-item">
-                    <span>Status:</span>
-                    <span id="status">-</span>
+                
+                <div class="breakdown">
+                    <h4>📈 Detail Investasi:</h4>
+                    <div class="breakdown-item">
+                        <span>Modal Awal:</span>
+                        <span id="modalAwal">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Jumlah Koin yang Dimiliki:</span>
+                        <span id="jumlahKoinDimiliki">0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Harga Beli per Koin:</span>
+                        <span id="hargaBeliDisplay">$0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Harga Sekarang per Koin:</span>
+                        <span id="hargaSekarangDisplay">$0</span>
+                    </div>
                 </div>
             </div>
         </div>
