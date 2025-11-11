@@ -78,6 +78,83 @@ async function updateHargaSekarang() {
     }
 }
 
+// Fungsi untuk refresh Whale Alert
+function refreshWhaleAlert() {
+    const iframe = document.querySelector('.whale-iframe');
+    if (iframe) {
+        iframe.src = iframe.src; // Reload iframe
+        showNotification('Whale Alert data diperbarui!', 'success');
+    }
+}
+
+// Fungsi untuk menampilkan notifikasi
+function showNotification(message, type = 'info') {
+    // Buat elemen notifikasi
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    // Style notifikasi
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#28a745' : '#007bff'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    // Style tombol close
+    notification.querySelector('button').style.cssText = `
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2em;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Tambahkan style animation untuk notifikasi
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+
 // Fungsi untuk menampilkan modal hasil
 function showResultModal(cryptoName, cryptoPrice, profitData) {
     const modal = document.getElementById('resultModal');
