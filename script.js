@@ -2,10 +2,13 @@
 const cryptoMap = {
     'bitcoin': { symbol: 'BTC', name: 'Bitcoin' },
     'ethereum': { symbol: 'ETH', name: 'Ethereum' },
+    'binancecoin': { symbol: 'BNB', name: 'Binance Coin' },
+    'ripple': { symbol: 'XRP', name: 'Ripple' },
+    'solana': { symbol: 'SOL', name: 'Solana' },
     'litecoin': { symbol: 'LTC', name: 'Litecoin' },
     'tron': { symbol: 'TRX', name: 'Tron' },
-    'solana': { symbol: 'SOL', name: 'Solana' },
-    'dash': { symbol: 'DASH', name: 'Dash' }
+    'dash': { symbol: 'DASH', name: 'Dash' },
+    'tellor': { symbol: 'TRB', name: 'Tellor' }
 };
 
 let currentPrice = 0;
@@ -22,15 +25,23 @@ async function getCurrentPrice(cryptoId) {
         }
         
         const data = await response.json();
+        
+        // Debug: lihat response dari API
+        console.log('API Response:', data);
+        
+        if (!data[cryptoId]) {
+            throw new Error(`Data untuk ${cryptoId} tidak ditemukan`);
+        }
+        
         const price = data[cryptoId].usd;
-        const change = data[cryptoId].usd_24h_change;
+        const change = data[cryptoId].usd_24h_change || 0;
         
         showLoading(false);
         return { price, change };
     } catch (error) {
         showLoading(false);
         console.error('Error:', error);
-        alert('Gagal mengambil data harga. Silakan coba lagi.');
+        alert('Gagal mengambil data harga. Silakan coba lagi atau pilih crypto lain.');
         return null;
     }
 }
@@ -52,13 +63,20 @@ async function updateHargaSekarang() {
         priceChange24h = priceData.change;
         
         // Update tampilan harga
-        document.getElementById('hargaSekarangText').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('hargaSekarangText').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
         
         // Update price change
         const priceChangeElement = document.getElementById('priceChange');
-        priceChangeElement.textContent = `(${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`;
-        priceChangeElement.className = priceChange24h >= 0 ? 'positive' : 'negative';
-        priceChangeElement.classList.remove('hidden');
+        if (priceChange24h !== undefined && priceChange24h !== null) {
+            priceChangeElement.textContent = `(${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`;
+            priceChangeElement.className = priceChange24h >= 0 ? 'positive' : 'negative';
+            priceChangeElement.classList.remove('hidden');
+        } else {
+            priceChangeElement.classList.add('hidden');
+        }
+        
+        // Auto-focus ke input harga beli setelah harga didapat
+        document.getElementById('hargaBeli').focus();
     }
 }
 
@@ -105,8 +123,8 @@ async function hitungProfit() {
     document.getElementById('totalNilai').textContent = `$${totalNilai.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     document.getElementById('modalAwal').textContent = `$${modalAwal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     document.getElementById('jumlahKoinDimiliki').textContent = jumlahKoin.toFixed(8);
-    document.getElementById('hargaBeliDisplay').textContent = `$${hargaBeli.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('hargaSekarangDisplay').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('hargaBeliDisplay').textContent = `$${hargaBeli.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    document.getElementById('hargaSekarangDisplay').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
 
     // Tentukan status dan warna
     const statusElement = document.getElementById('status');
@@ -159,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cryptoSelect').addEventListener('change', function() {
         if (this.value) {
             updateHargaSekarang();
-            document.getElementById('hargaBeli').focus();
         }
     });
 
