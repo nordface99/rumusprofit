@@ -43,24 +43,6 @@ p {
     margin-bottom: 20px;
 }
 
-.input-row {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
-}
-
-.input-row .input-group {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-.separator {
-    color: #666;
-    font-weight: bold;
-    font-size: 14px;
-}
-
 label {
     display: block;
     margin-bottom: 8px;
@@ -80,6 +62,39 @@ select, input {
 select:focus, input:focus {
     outline: none;
     border-color: #667eea;
+}
+
+.price-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.current-price {
+    font-size: 1.1em;
+}
+
+.refresh-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    width: auto;
+    margin: 0;
+}
+
+.refresh-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
 }
 
 button {
@@ -108,14 +123,12 @@ button:hover {
     background: linear-gradient(135deg, #5a6268, #343a40);
 }
 
-.conversion-info {
+.loading {
     text-align: center;
-    margin-bottom: 20px;
-}
-
-.conversion-info small {
-    color: #666;
-    font-style: italic;
+    padding: 20px;
+    background: #e9ecef;
+    border-radius: 8px;
+    margin: 15px 0;
 }
 
 .result {
@@ -201,6 +214,14 @@ button:hover {
     color: #6c757d;
 }
 
+.positive {
+    color: #28a745;
+}
+
+.negative {
+    color: #dc3545;
+}
+
 .crypto-info {
     background: white;
     padding: 25px;
@@ -266,13 +287,9 @@ footer {
         padding: 20px;
     }
     
-    .input-row {
+    .price-info {
         flex-direction: column;
-        gap: 10px;
-    }
-    
-    .separator {
-        order: 2;
+        text-align: center;
     }
     
     .result-grid {
