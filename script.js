@@ -14,6 +14,7 @@ const cryptoMap = {
 
 let currentPrice = 0;
 let priceChange24h = 0;
+let whaleAlertsData = [];
 
 // Fungsi untuk mendapatkan harga real-time dari CoinGecko
 async function getCurrentPrice(cryptoId) {
@@ -78,12 +79,165 @@ async function updateHargaSekarang() {
     }
 }
 
-// Fungsi untuk refresh Whale Alert
-function refreshWhaleAlert() {
-    const iframe = document.querySelector('.whale-iframe');
-    if (iframe) {
-        iframe.src = iframe.src; // Reload iframe
-        showNotification('Whale Alert data diperbarui!', 'success');
+// Fungsi untuk memuat data Whale Alert (simulasi - karena API membutuhkan key)
+async function loadWhaleAlerts() {
+    try {
+        showWhaleLoading(true);
+        
+        // Simulasi data Whale Alert (karena API asli membutuhkan API key berbayar)
+        const simulatedAlerts = generateSimulatedWhaleAlerts();
+        whaleAlertsData = simulatedAlerts;
+        
+        // Update stats
+        updateWhaleStats(simulatedAlerts);
+        
+        // Tampilkan alerts
+        displayWhaleAlerts(simulatedAlerts);
+        
+        showNotification('Data Whale Alert berhasil dimuat!', 'success');
+        showWhaleLoading(false);
+        
+    } catch (error) {
+        console.error('Error loading whale alerts:', error);
+        showNotification('Gagal memuat data Whale Alert', 'error');
+        showWhaleLoading(false);
+    }
+}
+
+// Fungsi untuk generate simulated whale alerts data
+function generateSimulatedWhaleAlerts() {
+    const cryptos = [
+        { symbol: 'BTC', name: 'Bitcoin', icon: '₿' },
+        { symbol: 'ETH', name: 'Ethereum', icon: 'Ξ' },
+        { symbol: 'XRP', name: 'Ripple', icon: '✕' },
+        { symbol: 'USDT', name: 'Tether', icon: '₮' }
+    ];
+    
+    const types = ['incoming', 'outgoing', 'transfer'];
+    const exchanges = ['Binance', 'Coinbase', 'Kraken', 'Unknown Wallet'];
+    
+    const alerts = [];
+    const alertCount = Math.floor(Math.random() * 8) + 5; // 5-12 alerts
+    
+    for (let i = 0; i < alertCount; i++) {
+        const crypto = cryptos[Math.floor(Math.random() * cryptos.length)];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const amount = (Math.random() * 1000 + 100).toFixed(2);
+        const value = (Math.random() * 5000000 + 1000000).toFixed(0);
+        const from = exchanges[Math.floor(Math.random() * exchanges.length)];
+        const to = exchanges[Math.floor(Math.random() * exchanges.length)];
+        
+        // Pastikan from dan to berbeda untuk transfer
+        const finalTo = type === 'transfer' && from === to ? 
+            exchanges[(exchanges.indexOf(from) + 1) % exchanges.length] : to;
+        
+        const timestamp = new Date(Date.now() - Math.random() * 3600000); // 1 jam terakhir
+        
+        alerts.push({
+            id: i + 1,
+            cryptocurrency: crypto.symbol,
+            cryptoName: crypto.name,
+            cryptoIcon: crypto.icon,
+            amount: parseFloat(amount),
+            value: parseInt(value),
+            type: type,
+            from: from,
+            to: finalTo,
+            timestamp: timestamp,
+            transaction_hash: '0x' + Math.random().toString(16).substr(2, 64)
+        });
+    }
+    
+    // Urutkan berdasarkan timestamp terbaru
+    return alerts.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+// Fungsi untuk update whale stats
+function updateWhaleStats(alerts) {
+    const totalTransactions = alerts.length;
+    const totalValue = alerts.reduce((sum, alert) => sum + alert.value, 0);
+    const lastUpdate = new Date().toLocaleTimeString('id-ID');
+    
+    document.getElementById('totalTransactions').textContent = totalTransactions;
+    document.getElementById('totalValue').textContent = `$${(totalValue / 1000000).toFixed(1)}M`;
+    document.getElementById('lastUpdate').textContent = lastUpdate;
+}
+
+// Fungsi untuk menampilkan whale alerts
+function displayWhaleAlerts(alerts) {
+    const container = document.getElementById('whaleAlertsContainer');
+    const filter = document.getElementById('whaleFilter').value;
+    
+    // Filter alerts berdasarkan pilihan
+    const filteredAlerts = filter === 'all' ? 
+        alerts : alerts.filter(alert => alert.cryptocurrency === filter);
+    
+    if (filteredAlerts.length === 0) {
+        container.innerHTML = `
+            <div class="no-data">
+                <p>🐋 Tidak ada transaksi whale untuk ${filter}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = filteredAlerts.map(alert => `
+        <div class="whale-alert-item">
+            <div class="whale-crypto-icon">${alert.cryptoIcon}</div>
+            <div class="whale-alert-details">
+                <div class="whale-alert-header">
+                    <span class="whale-crypto-name">${alert.cryptoName} (${alert.cryptocurrency})</span>
+                    <span class="whale-amount">${alert.amount.toLocaleString()} ${alert.cryptocurrency}</span>
+                </div>
+                <div class="whale-alert-meta">
+                    <span class="whale-value">$${(alert.value / 1000000).toFixed(2)}M</span>
+                    <span class="whale-time">${formatTime(alert.timestamp)}</span>
+                    <span class="whale-type ${alert.type}">${getTypeLabel(alert.type)}</span>
+                    <span>From: ${alert.from}</span>
+                    <span>To: ${alert.to}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Fungsi untuk filter whale alerts
+function filterWhaleAlerts() {
+    if (whaleAlertsData.length > 0) {
+        displayWhaleAlerts(whaleAlertsData);
+    }
+}
+
+// Helper function untuk format waktu
+function formatTime(timestamp) {
+    const now = new Date();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    
+    if (minutes < 1) return 'Baru saja';
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    return timestamp.toLocaleDateString('id-ID');
+}
+
+// Helper function untuk label tipe transaksi
+function getTypeLabel(type) {
+    const labels = {
+        'incoming': 'Masuk',
+        'outgoing': 'Keluar',
+        'transfer': 'Transfer'
+    };
+    return labels[type] || type;
+}
+
+// Fungsi untuk menampilkan/menyembunyikan loading whale
+function showWhaleLoading(show) {
+    const loadingElement = document.getElementById('whaleLoading');
+    if (show) {
+        loadingElement.classList.remove('hidden');
+    } else {
+        loadingElement.classList.add('hidden');
     }
 }
 
@@ -102,7 +256,7 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#28a745' : '#007bff'};
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
         color: white;
         padding: 15px 20px;
         border-radius: 8px;
@@ -226,7 +380,7 @@ function shareResult() {
         });
     } else {
         navigator.clipboard.writeText(shareText).then(() => {
-            alert('Hasil telah disalin ke clipboard! 📋');
+            showNotification('Hasil telah disalin ke clipboard! 📋', 'success');
         });
     }
 }
