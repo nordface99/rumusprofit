@@ -16,12 +16,12 @@
                 <label for="cryptoSelect">Pilih Cryptocurrency:</label>
                 <select id="cryptoSelect">
                     <option value="">-- Pilih Crypto --</option>
-                    <option value="BTC">Bitcoin (BTC)</option>
-                    <option value="ETH">Ethereum (ETH)</option>
-                    <option value="LTC">Litecoin (LTC)</option>
-                    <option value="TRX">Tron (TRX)</option>
-                    <option value="SOL">Solana (SOL)</option>
-                    <option value="DASH">Dash (DASH)</option>
+                    <option value="bitcoin">Bitcoin (BTC)</option>
+                    <option value="ethereum">Ethereum (ETH)</option>
+                    <option value="litecoin">Litecoin (LTC)</option>
+                    <option value="tron">Tron (TRX)</option>
+                    <option value="solana">Solana (SOL)</option>
+                    <option value="dash">Dash (DASH)</option>
                 </select>
             </div>
 
@@ -31,30 +31,27 @@
             </div>
 
             <div class="input-group">
-                <label for="hargaSekarang">Harga Sekarang per Koin (USD):</label>
-                <input type="number" id="hargaSekarang" placeholder="Masukkan harga realtime">
+                <label for="jumlahInvestasi">Jumlah Investasi (USD):</label>
+                <input type="number" id="jumlahInvestasi" placeholder="Masukkan jumlah USD yang diinvestasikan">
             </div>
 
-            <div class="input-row">
-                <div class="input-group">
-                    <label for="jumlahKoin">Jumlah Koin:</label>
-                    <input type="number" id="jumlahKoin" placeholder="Jumlah koin" step="0.00000001">
+            <div class="price-info">
+                <div class="current-price">
+                    <strong>Harga Sekarang: </strong>
+                    <span id="hargaSekarangText">-</span>
+                    <span id="priceChange" class="hidden"></span>
                 </div>
-                
-                <div class="separator">ATAU</div>
-                
-                <div class="input-group">
-                    <label for="jumlahUSD">Jumlah Investasi (USD):</label>
-                    <input type="number" id="jumlahUSD" placeholder="Jumlah USD">
-                </div>
-            </div>
-
-            <div class="conversion-info">
-                <small>💡 Isi salah satu: Jumlah Koin ATAU Jumlah USD</small>
+                <button type="button" onclick="updateHargaSekarang()" class="refresh-btn">
+                    🔄 Update Harga
+                </button>
             </div>
 
             <button onclick="hitungProfit()">Hitung Profit/Loss</button>
             <button onclick="resetForm()" class="reset-btn">Reset</button>
+
+            <div id="loading" class="loading hidden">
+                <p>🔄 Mengambil data harga terbaru...</p>
+            </div>
 
             <div id="hasil" class="result hidden">
                 <h3>📊 Hasil Perhitungan:</h3>
@@ -131,7 +128,7 @@
     </div>
 
     <footer>
-        <p>© 2024 Crypto Profit Calculator | Hosted on GitHub Pages</p>
+        <p>© 2024 Crypto Profit Calculator | Data harga dari CoinGecko API</p>
     </footer>
 
     <script src="script.js"></script>
