@@ -1,312 +1,257 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* ... (kode sebelumnya tetap) ... */
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-}
-
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-h1 {
-    text-align: center;
-    color: white;
-    margin-bottom: 10px;
-    font-size: 2.5em;
-}
-
-p {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 30px;
-}
-
-.calculator {
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    margin-bottom: 30px;
-}
-
-.input-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #555;
-}
-
-select, input {
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
 }
 
-select:focus, input:focus {
-    outline: none;
-    border-color: #667eea;
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
 }
 
-.price-info {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+.modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 25px;
+    border-radius: 20px 20px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
 }
 
-.current-price {
-    font-size: 1.1em;
-}
-
-.refresh-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9em;
-    width: auto;
+.modal-header h2 {
     margin: 0;
+    font-size: 1.5em;
 }
 
-.refresh-btn:hover {
-    background: #218838;
-    transform: translateY(-1px);
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: 600;
+.close-btn {
+    font-size: 2em;
     cursor: pointer;
-    transition: transform 0.2s ease;
-    margin-bottom: 10px;
+    background: none;
+    border: none;
+    color: white;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
 }
 
-button:hover {
-    transform: translateY(-2px);
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.reset-btn {
-    background: linear-gradient(135deg, #6c757d, #495057);
+.modal-body {
+    padding: 30px;
 }
 
-.reset-btn:hover {
-    background: linear-gradient(135deg, #5a6268, #343a40);
-}
-
-.loading {
-    text-align: center;
+.crypto-summary {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
     padding: 20px;
-    background: #e9ecef;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-
-.result {
-    margin-top: 30px;
-    padding: 25px;
     background: #f8f9fa;
-    border-radius: 10px;
-    border-left: 5px solid #667eea;
+    border-radius: 12px;
 }
 
-.result h3 {
-    margin-bottom: 20px;
+.crypto-icon {
+    font-size: 2.5em;
+}
+
+.crypto-details h3 {
+    margin: 0 0 5px 0;
     color: #333;
-    text-align: center;
+    font-size: 1.4em;
 }
 
-.result-grid {
+.crypto-details p {
+    margin: 0;
+    color: #666;
+    text-align: left;
+}
+
+.result-grid-modal {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
     margin-bottom: 25px;
 }
 
-.result-card {
+.result-card-modal {
     background: white;
     padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border: 2px solid #e9ecef;
-}
-
-.result-card h4 {
-    color: #666;
-    font-size: 0.9em;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.value {
-    font-size: 1.3em;
-    font-weight: bold;
-}
-
-.breakdown {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.breakdown h4 {
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.breakdown-item {
+    border-radius: 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.breakdown-item:last-child {
-    border-bottom: none;
-}
-
-.hidden {
-    display: none;
-}
-
-.profit {
-    color: #28a745;
-}
-
-.loss {
-    color: #dc3545;
-}
-
-.neutral {
-    color: #6c757d;
-}
-
-.positive {
-    color: #28a745;
-}
-
-.negative {
-    color: #dc3545;
-}
-
-.crypto-info {
-    background: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.crypto-info h3 {
-    margin-bottom: 20px;
-    text-align: center;
-    color: #333;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
-}
-
-.info-card {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border: 2px solid #e9ecef;
     transition: transform 0.2s ease;
 }
 
-.info-card:hover {
+.result-card-modal:hover {
     transform: translateY(-3px);
-    border-color: #667eea;
 }
 
-.info-card h4 {
-    color: #667eea;
-    margin-bottom: 5px;
+.result-icon {
+    font-size: 2em;
 }
 
-.info-card p {
+.result-text h4 {
+    margin: 0 0 8px 0;
     color: #666;
     font-size: 0.9em;
-    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-footer {
-    text-align: center;
-    color: white;
-    margin-top: 40px;
+.value-modal {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+.breakdown-modal {
+    background: #f8f9fa;
     padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
 }
 
-/* Responsive Design */
+.breakdown-modal h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.breakdown-item-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.breakdown-item-modal:last-child {
+    border-bottom: none;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-close-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.modal-share-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-share-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Modal */
 @media (max-width: 768px) {
-    .container {
-        padding: 15px;
+    .modal-content {
+        width: 95%;
+        margin: 20px;
     }
     
-    h1 {
-        font-size: 2em;
-    }
-    
-    .calculator {
+    .modal-header {
         padding: 20px;
     }
     
-    .price-info {
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .result-grid-modal {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    .crypto-summary {
         flex-direction: column;
         text-align: center;
-    }
-    
-    .result-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    
-    .info-grid {
-        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 480px) {
-    .result-grid {
-        grid-template-columns: 1fr;
+    .modal-header h2 {
+        font-size: 1.3em;
     }
     
-    .info-grid {
-        grid-template-columns: 1fr;
+    .result-card-modal {
+        flex-direction: column;
+        text-align: center;
     }
 }
