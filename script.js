@@ -1,4 +1,84 @@
-// ... (kode sebelumnya tetap) ...
+// Mapping cryptocurrency IDs untuk CoinGecko API
+const cryptoMap = {
+    'bitcoin': { symbol: 'BTC', name: 'Bitcoin' },
+    'ethereum': { symbol: 'ETH', name: 'Ethereum' },
+    'binancecoin': { symbol: 'BNB', name: 'Binance Coin' },
+    'ripple': { symbol: 'XRP', name: 'Ripple' },
+    'solana': { symbol: 'SOL', name: 'Solana' },
+    'litecoin': { symbol: 'LTC', name: 'Litecoin' },
+    'tron': { symbol: 'TRX', name: 'Tron' },
+    'dash': { symbol: 'DASH', name: 'Dash' },
+    'tellor': { symbol: 'TRB', name: 'Tellor' }
+};
+
+let currentPrice = 0;
+let priceChange24h = 0;
+
+// Fungsi untuk mendapatkan harga real-time dari CoinGecko
+async function getCurrentPrice(cryptoId) {
+    try {
+        showLoading(true);
+        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoId}&vs_currencies=usd&include_24hr_change=true`);
+        
+        if (!response.ok) {
+            throw new Error('Gagal mengambil data harga');
+        }
+        
+        const data = await response.json();
+        
+        // Debug: lihat response dari API
+        console.log('API Response:', data);
+        
+        if (!data[cryptoId]) {
+            throw new Error(`Data untuk ${cryptoId} tidak ditemukan`);
+        }
+        
+        const price = data[cryptoId].usd;
+        const change = data[cryptoId].usd_24h_change || 0;
+        
+        showLoading(false);
+        return { price, change };
+    } catch (error) {
+        showLoading(false);
+        console.error('Error:', error);
+        alert('Gagal mengambil data harga. Silakan coba lagi atau pilih crypto lain.');
+        return null;
+    }
+}
+
+// Fungsi untuk update harga saat cryptocurrency dipilih
+async function updateHargaSekarang() {
+    const cryptoSelect = document.getElementById('cryptoSelect');
+    const selectedCrypto = cryptoSelect.value;
+    
+    if (!selectedCrypto) {
+        alert('Silakan pilih cryptocurrency terlebih dahulu!');
+        return;
+    }
+    
+    const priceData = await getCurrentPrice(selectedCrypto);
+    
+    if (priceData) {
+        currentPrice = priceData.price;
+        priceChange24h = priceData.change;
+        
+        // Update tampilan harga
+        document.getElementById('hargaSekarangText').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+        
+        // Update price change
+        const priceChangeElement = document.getElementById('priceChange');
+        if (priceChange24h !== undefined && priceChange24h !== null) {
+            priceChangeElement.textContent = `(${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`;
+            priceChangeElement.className = priceChange24h >= 0 ? 'positive' : 'negative';
+            priceChangeElement.classList.remove('hidden');
+        } else {
+            priceChangeElement.classList.add('hidden');
+        }
+        
+        // Auto-focus ke input harga beli setelah harga didapat
+        document.getElementById('hargaBeli').focus();
+    }
+}
 
 // Fungsi untuk menampilkan modal hasil
 function showResultModal(cryptoName, cryptoPrice, profitData) {
@@ -77,32 +157,59 @@ function shareResult() {
     }
 }
 
-// Fungsi utama hitung profit (diupdate)
+// FUNGSI UTAMA HITUNG PROFIT - DIPERBAIKI
 async function hitungProfit() {
-    const cryptoSelect = document.getElementById('cryptoSelect').value;
-    const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
-    const jumlahInvestasi = parseFloat(document.getElementById('jumlahInvestasi').value);
+    console.log('hitungProfit() dipanggil'); // Debug
+    
+    const cryptoSelect = document.getElementById('cryptoSelect');
+    const hargaBeliInput = document.getElementById('hargaBeli');
+    const jumlahInvestasiInput = document.getElementById('jumlahInvestasi');
+    
+    const selectedCrypto = cryptoSelect.value;
+    const hargaBeli = parseFloat(hargaBeliInput.value);
+    const jumlahInvestasi = parseFloat(jumlahInvestasiInput.value);
 
-    // Validasi input
-    if (!cryptoSelect) {
+    console.log('Input values:', { selectedCrypto, hargaBeli, jumlahInvestasi }); // Debug
+
+    // VALIDASI YANG LEBIH KETAT
+    if (!selectedCrypto) {
         alert('Silakan pilih cryptocurrency terlebih dahulu!');
+        cryptoSelect.focus();
         return;
     }
 
-    if (!hargaBeli || !jumlahInvestasi) {
-        alert('Silakan isi harga beli dan jumlah investasi!');
+    if (!hargaBeli || isNaN(hargaBeli)) {
+        alert('Silakan isi harga beli dengan angka yang valid!');
+        hargaBeliInput.focus();
         return;
     }
 
-    if (hargaBeli <= 0 || jumlahInvestasi <= 0) {
-        alert('Harga beli dan jumlah investasi harus lebih besar dari 0!');
+    if (!jumlahInvestasi || isNaN(jumlahInvestasi)) {
+        alert('Silakan isi jumlah investasi dengan angka yang valid!');
+        jumlahInvestasiInput.focus();
+        return;
+    }
+
+    if (hargaBeli <= 0) {
+        alert('Harga beli harus lebih besar dari 0!');
+        hargaBeliInput.focus();
+        return;
+    }
+
+    if (jumlahInvestasi <= 0) {
+        alert('Jumlah investasi harus lebih besar dari 0!');
+        jumlahInvestasiInput.focus();
         return;
     }
 
     // Jika harga sekarang belum diambil, ambil dulu
     if (currentPrice === 0) {
+        console.log('Mengambil harga realtime...'); // Debug
         await updateHargaSekarang();
-        if (currentPrice === 0) return; // Jika masih gagal, berhenti
+        if (currentPrice === 0) {
+            alert('Gagal mengambil harga realtime. Silakan coba lagi.');
+            return;
+        }
     }
 
     // Hitung jumlah koin berdasarkan investasi
@@ -113,6 +220,14 @@ async function hitungProfit() {
     const profitNominal = (currentPrice - hargaBeli) * jumlahKoin;
     const totalNilai = currentPrice * jumlahKoin;
     const modalAwal = hargaBeli * jumlahKoin;
+
+    console.log('Calculation results:', { // Debug
+        jumlahKoin, 
+        profitPercentage, 
+        profitNominal, 
+        totalNilai, 
+        modalAwal 
+    });
 
     // Siapkan data untuk modal
     const profitData = {
@@ -126,13 +241,46 @@ async function hitungProfit() {
     };
 
     // Tampilkan modal popup
-    showResultModal(cryptoSelect, currentPrice, profitData);
+    showResultModal(selectedCrypto, currentPrice, profitData);
 }
 
-// ... (kode lainnya tetap sama) ...
+// Fungsi untuk menampilkan/menyembunyikan loading
+function showLoading(show) {
+    const loadingElement = document.getElementById('loading');
+    if (show) {
+        loadingElement.classList.remove('hidden');
+    } else {
+        loadingElement.classList.add('hidden');
+    }
+}
 
-// Close modal ketika klik di luar konten
+// Event listener ketika halaman dimuat - DIPERBAIKI
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded'); // Debug
+    
+    // Pastikan modal tersembunyi saat halaman dimuat
+    closeModal();
+    
+    // Auto update harga ketika cryptocurrency dipilih
+    document.getElementById('cryptoSelect').addEventListener('change', function() {
+        console.log('Cryptocurrency dipilih:', this.value); // Debug
+        if (this.value) {
+            updateHargaSekarang();
+        }
+    });
+
+    // Enter key support - HANYA untuk input fields
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                console.log('Enter pressed on input'); // Debug
+                hitungProfit();
+            }
+        });
+    });
+
+    // Close modal ketika klik di luar konten
     const modal = document.getElementById('resultModal');
     
     modal.addEventListener('click', function(e) {
@@ -147,6 +295,26 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }
     });
-    
-    // ... (event listener lainnya) ...
+
+    // Hapus event listener yang tidak perlu yang mungkin memicu hitungProfit otomatis
+    console.log('Event listeners setup completed'); // Debug
 });
+
+// Fungsi untuk reset form
+function resetForm() {
+    console.log('resetForm() dipanggil'); // Debug
+    
+    document.getElementById('cryptoSelect').value = '';
+    document.getElementById('hargaBeli').value = '';
+    document.getElementById('jumlahInvestasi').value = '';
+    document.getElementById('hargaSekarangText').textContent = '-';
+    document.getElementById('priceChange').classList.add('hidden');
+    
+    // Pastikan modal tertutup saat reset
+    closeModal();
+    
+    currentPrice = 0;
+    priceChange24h = 0;
+    
+    console.log('Form reset completed'); // Debug
+}
