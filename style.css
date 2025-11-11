@@ -13,7 +13,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -137,6 +137,7 @@ button:hover {
     padding: 25px;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
 }
 
 .crypto-info h3 {
@@ -174,6 +175,114 @@ button:hover {
     color: #666;
     font-size: 0.9em;
     margin: 0;
+}
+
+/* Whale Alert Section */
+.whale-alert-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.section-header h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.8em;
+}
+
+.section-header p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+.whale-alert-container {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.whale-alert-frame {
+    background: #f8f9fa;
+    padding: 0;
+}
+
+.whale-iframe {
+    border: none;
+    background: white;
+}
+
+.whale-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 8px 0;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-icon {
+    font-size: 1.2em;
+    width: 30px;
+    text-align: center;
+}
+
+.whale-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.whale-link-btn {
+    background: #007bff;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.whale-link-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.refresh-whale-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.refresh-whale-btn:hover {
+    background: #138496;
+    transform: translateY(-2px);
 }
 
 /* Modal Styles */
@@ -471,6 +580,16 @@ footer {
         flex-direction: column;
         text-align: center;
     }
+    
+    .whale-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .whale-link-btn, .refresh-whale-btn {
+        width: 200px;
+        text-align: center;
+    }
 }
 
 @media (max-width: 480px) {
@@ -485,5 +604,13 @@ footer {
     .result-card-modal {
         flex-direction: column;
         text-align: center;
+    }
+    
+    .whale-alert-section {
+        padding: 20px;
+    }
+    
+    .section-header h3 {
+        font-size: 1.5em;
     }
 }
