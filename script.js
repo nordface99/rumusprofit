@@ -26,9 +26,6 @@ async function getCurrentPrice(cryptoId) {
         
         const data = await response.json();
         
-        // Debug: lihat response dari API
-        console.log('API Response:', data);
-        
         if (!data[cryptoId]) {
             throw new Error(`Data untuk ${cryptoId} tidak ditemukan`);
         }
@@ -125,17 +122,17 @@ function showResultModal(cryptoName, cryptoPrice, profitData) {
     
     // Tampilkan modal
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 // Fungsi untuk menutup modal
 function closeModal() {
     const modal = document.getElementById('resultModal');
     modal.classList.add('hidden');
-    document.body.style.overflow = 'auto'; // Enable scrolling again
+    document.body.style.overflow = 'auto';
 }
 
-// Fungsi untuk share result (opsional)
+// Fungsi untuk share result
 function shareResult() {
     const cryptoName = document.getElementById('modalCryptoName').textContent;
     const profitPercentage = document.getElementById('modalProfitPercentage').textContent;
@@ -150,17 +147,14 @@ function shareResult() {
             url: window.location.href
         });
     } else {
-        // Fallback untuk browser yang tidak support Web Share API
         navigator.clipboard.writeText(shareText).then(() => {
             alert('Hasil telah disalin ke clipboard! 📋');
         });
     }
 }
 
-// FUNGSI UTAMA HITUNG PROFIT - DIPERBAIKI
+// Fungsi utama hitung profit
 async function hitungProfit() {
-    console.log('hitungProfit() dipanggil'); // Debug
-    
     const cryptoSelect = document.getElementById('cryptoSelect');
     const hargaBeliInput = document.getElementById('hargaBeli');
     const jumlahInvestasiInput = document.getElementById('jumlahInvestasi');
@@ -169,9 +163,7 @@ async function hitungProfit() {
     const hargaBeli = parseFloat(hargaBeliInput.value);
     const jumlahInvestasi = parseFloat(jumlahInvestasiInput.value);
 
-    console.log('Input values:', { selectedCrypto, hargaBeli, jumlahInvestasi }); // Debug
-
-    // VALIDASI YANG LEBIH KETAT
+    // Validasi input
     if (!selectedCrypto) {
         alert('Silakan pilih cryptocurrency terlebih dahulu!');
         cryptoSelect.focus();
@@ -204,7 +196,6 @@ async function hitungProfit() {
 
     // Jika harga sekarang belum diambil, ambil dulu
     if (currentPrice === 0) {
-        console.log('Mengambil harga realtime...'); // Debug
         await updateHargaSekarang();
         if (currentPrice === 0) {
             alert('Gagal mengambil harga realtime. Silakan coba lagi.');
@@ -220,14 +211,6 @@ async function hitungProfit() {
     const profitNominal = (currentPrice - hargaBeli) * jumlahKoin;
     const totalNilai = currentPrice * jumlahKoin;
     const modalAwal = hargaBeli * jumlahKoin;
-
-    console.log('Calculation results:', { // Debug
-        jumlahKoin, 
-        profitPercentage, 
-        profitNominal, 
-        totalNilai, 
-        modalAwal 
-    });
 
     // Siapkan data untuk modal
     const profitData = {
@@ -254,27 +237,23 @@ function showLoading(show) {
     }
 }
 
-// Event listener ketika halaman dimuat - DIPERBAIKI
+// Event listener ketika halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded'); // Debug
-    
     // Pastikan modal tersembunyi saat halaman dimuat
     closeModal();
     
     // Auto update harga ketika cryptocurrency dipilih
     document.getElementById('cryptoSelect').addEventListener('change', function() {
-        console.log('Cryptocurrency dipilih:', this.value); // Debug
         if (this.value) {
             updateHargaSekarang();
         }
     });
 
-    // Enter key support - HANYA untuk input fields
+    // Enter key support untuk input fields
     const inputs = document.querySelectorAll('input[type="number"]');
     inputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                console.log('Enter pressed on input'); // Debug
                 hitungProfit();
             }
         });
@@ -295,15 +274,10 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }
     });
-
-    // Hapus event listener yang tidak perlu yang mungkin memicu hitungProfit otomatis
-    console.log('Event listeners setup completed'); // Debug
 });
 
 // Fungsi untuk reset form
 function resetForm() {
-    console.log('resetForm() dipanggil'); // Debug
-    
     document.getElementById('cryptoSelect').value = '';
     document.getElementById('hargaBeli').value = '';
     document.getElementById('jumlahInvestasi').value = '';
@@ -315,6 +289,4 @@ function resetForm() {
     
     currentPrice = 0;
     priceChange24h = 0;
-    
-    console.log('Form reset completed'); // Debug
 }
