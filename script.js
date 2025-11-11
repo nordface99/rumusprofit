@@ -1,12 +1,72 @@
-let jumlahKoinValue = 0;
+// Mapping cryptocurrency IDs untuk CoinGecko API
+const cryptoMap = {
+    'bitcoin': { symbol: 'BTC', name: 'Bitcoin' },
+    'ethereum': { symbol: 'ETH', name: 'Ethereum' },
+    'litecoin': { symbol: 'LTC', name: 'Litecoin' },
+    'tron': { symbol: 'TRX', name: 'Tron' },
+    'solana': { symbol: 'SOL', name: 'Solana' },
+    'dash': { symbol: 'DASH', name: 'Dash' }
+};
 
-function hitungProfit() {
-    // Ambil nilai dari input
+let currentPrice = 0;
+let priceChange24h = 0;
+
+// Fungsi untuk mendapatkan harga real-time dari CoinGecko
+async function getCurrentPrice(cryptoId) {
+    try {
+        showLoading(true);
+        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoId}&vs_currencies=usd&include_24hr_change=true`);
+        
+        if (!response.ok) {
+            throw new Error('Gagal mengambil data harga');
+        }
+        
+        const data = await response.json();
+        const price = data[cryptoId].usd;
+        const change = data[cryptoId].usd_24h_change;
+        
+        showLoading(false);
+        return { price, change };
+    } catch (error) {
+        showLoading(false);
+        console.error('Error:', error);
+        alert('Gagal mengambil data harga. Silakan coba lagi.');
+        return null;
+    }
+}
+
+// Fungsi untuk update harga saat cryptocurrency dipilih
+async function updateHargaSekarang() {
+    const cryptoSelect = document.getElementById('cryptoSelect');
+    const selectedCrypto = cryptoSelect.value;
+    
+    if (!selectedCrypto) {
+        alert('Silakan pilih cryptocurrency terlebih dahulu!');
+        return;
+    }
+    
+    const priceData = await getCurrentPrice(selectedCrypto);
+    
+    if (priceData) {
+        currentPrice = priceData.price;
+        priceChange24h = priceData.change;
+        
+        // Update tampilan harga
+        document.getElementById('hargaSekarangText').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        
+        // Update price change
+        const priceChangeElement = document.getElementById('priceChange');
+        priceChangeElement.textContent = `(${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`;
+        priceChangeElement.className = priceChange24h >= 0 ? 'positive' : 'negative';
+        priceChangeElement.classList.remove('hidden');
+    }
+}
+
+// Fungsi utama hitung profit
+async function hitungProfit() {
     const cryptoSelect = document.getElementById('cryptoSelect').value;
     const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
-    const hargaSekarang = parseFloat(document.getElementById('hargaSekarang').value);
-    const jumlahKoin = parseFloat(document.getElementById('jumlahKoin').value);
-    const jumlahUSD = parseFloat(document.getElementById('jumlahUSD').value);
+    const jumlahInvestasi = parseFloat(document.getElementById('jumlahInvestasi').value);
 
     // Validasi input
     if (!cryptoSelect) {
@@ -14,49 +74,39 @@ function hitungProfit() {
         return;
     }
 
-    if (!hargaBeli || !hargaSekarang) {
-        alert('Silakan isi harga beli dan harga sekarang!');
+    if (!hargaBeli || !jumlahInvestasi) {
+        alert('Silakan isi harga beli dan jumlah investasi!');
         return;
     }
 
-    if (hargaBeli <= 0 || hargaSekarang <= 0) {
-        alert('Harga harus lebih besar dari 0!');
+    if (hargaBeli <= 0 || jumlahInvestasi <= 0) {
+        alert('Harga beli dan jumlah investasi harus lebih besar dari 0!');
         return;
     }
 
-    // Hitung jumlah koin berdasarkan input
-    if (jumlahUSD > 0 && jumlahKoin > 0) {
-        alert('Silakan pilih: isi Jumlah Koin ATAU Jumlah USD, bukan keduanya!');
-        return;
+    // Jika harga sekarang belum diambil, ambil dulu
+    if (currentPrice === 0) {
+        await updateHargaSekarang();
+        if (currentPrice === 0) return; // Jika masih gagal, berhenti
     }
 
-    if (jumlahUSD > 0) {
-        // Jika input USD, hitung jumlah koin
-        jumlahKoinValue = jumlahUSD / hargaBeli;
-        document.getElementById('jumlahKoin').value = jumlahKoinValue.toFixed(8);
-    } else if (jumlahKoin > 0) {
-        // Jika input jumlah koin
-        jumlahKoinValue = jumlahKoin;
-        document.getElementById('jumlahUSD').value = (jumlahKoin * hargaBeli).toFixed(2);
-    } else {
-        alert('Silakan isi Jumlah Koin atau Jumlah USD!');
-        return;
-    }
+    // Hitung jumlah koin berdasarkan investasi
+    const jumlahKoin = jumlahInvestasi / hargaBeli;
 
     // Hitung profit/loss
-    const profitPercentage = ((hargaSekarang - hargaBeli) / hargaBeli) * 100;
-    const profitNominal = (hargaSekarang - hargaBeli) * jumlahKoinValue;
-    const totalNilai = hargaSekarang * jumlahKoinValue;
-    const modalAwal = hargaBeli * jumlahKoinValue;
+    const profitPercentage = ((currentPrice - hargaBeli) / hargaBeli) * 100;
+    const profitNominal = (currentPrice - hargaBeli) * jumlahKoin;
+    const totalNilai = currentPrice * jumlahKoin;
+    const modalAwal = hargaBeli * jumlahKoin;
 
     // Tampilkan hasil
     document.getElementById('profitPercentage').textContent = `${profitPercentage.toFixed(2)}%`;
-    document.getElementById('profitNominal').textContent = `$${profitNominal.toFixed(2)}`;
-    document.getElementById('totalNilai').textContent = `$${totalNilai.toFixed(2)}`;
-    document.getElementById('modalAwal').textContent = `$${modalAwal.toFixed(2)}`;
-    document.getElementById('jumlahKoinDimiliki').textContent = jumlahKoinValue.toFixed(8);
-    document.getElementById('hargaBeliDisplay').textContent = `$${hargaBeli.toFixed(2)}`;
-    document.getElementById('hargaSekarangDisplay').textContent = `$${hargaSekarang.toFixed(2)}`;
+    document.getElementById('profitNominal').textContent = `$${profitNominal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('totalNilai').textContent = `$${totalNilai.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('modalAwal').textContent = `$${modalAwal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('jumlahKoinDimiliki').textContent = jumlahKoin.toFixed(8);
+    document.getElementById('hargaBeliDisplay').textContent = `$${hargaBeli.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('hargaSekarangDisplay').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Tentukan status dan warna
     const statusElement = document.getElementById('status');
@@ -93,55 +143,28 @@ function hitungProfit() {
     });
 }
 
-// Fungsi untuk auto-convert antara jumlah koin dan USD
-function setupAutoConvert() {
-    const jumlahKoinInput = document.getElementById('jumlahKoin');
-    const jumlahUSDInput = document.getElementById('jumlahUSD');
-    const hargaBeliInput = document.getElementById('hargaBeli');
-
-    jumlahKoinInput.addEventListener('input', function() {
-        const hargaBeli = parseFloat(hargaBeliInput.value);
-        const jumlahKoin = parseFloat(this.value);
-        
-        if (hargaBeli > 0 && jumlahKoin > 0) {
-            jumlahUSDInput.value = (jumlahKoin * hargaBeli).toFixed(2);
-        } else if (jumlahKoin === 0) {
-            jumlahUSDInput.value = '';
-        }
-    });
-
-    jumlahUSDInput.addEventListener('input', function() {
-        const hargaBeli = parseFloat(hargaBeliInput.value);
-        const jumlahUSD = parseFloat(this.value);
-        
-        if (hargaBeli > 0 && jumlahUSD > 0) {
-            jumlahKoinInput.value = (jumlahUSD / hargaBeli).toFixed(8);
-        } else if (jumlahUSD === 0) {
-            jumlahKoinInput.value = '';
-        }
-    });
-
-    hargaBeliInput.addEventListener('input', function() {
-        const hargaBeli = parseFloat(this.value);
-        const jumlahKoin = parseFloat(jumlahKoinInput.value);
-        const jumlahUSD = parseFloat(jumlahUSDInput.value);
-        
-        if (hargaBeli > 0) {
-            if (jumlahKoin > 0) {
-                jumlahUSDInput.value = (jumlahKoin * hargaBeli).toFixed(2);
-            } else if (jumlahUSD > 0) {
-                jumlahKoinInput.value = (jumlahUSD / hargaBeli).toFixed(8);
-            }
-        }
-    });
+// Fungsi untuk menampilkan/menyembunyikan loading
+function showLoading(show) {
+    const loadingElement = document.getElementById('loading');
+    if (show) {
+        loadingElement.classList.remove('hidden');
+    } else {
+        loadingElement.classList.add('hidden');
+    }
 }
 
-// Event listener untuk input real-time
+// Event listener ketika halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
-    setupAutoConvert();
-    
-    const inputs = document.querySelectorAll('input, select');
-    
+    // Auto update harga ketika cryptocurrency dipilih
+    document.getElementById('cryptoSelect').addEventListener('change', function() {
+        if (this.value) {
+            updateHargaSekarang();
+            document.getElementById('hargaBeli').focus();
+        }
+    });
+
+    // Enter key support
+    const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -149,21 +172,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
-    // Auto-focus pada harga beli setelah memilih crypto
-    document.getElementById('cryptoSelect').addEventListener('change', function() {
-        if (this.value) {
-            document.getElementById('hargaBeli').focus();
-        }
-    });
 });
 
 // Fungsi untuk reset form
 function resetForm() {
     document.getElementById('cryptoSelect').value = '';
     document.getElementById('hargaBeli').value = '';
-    document.getElementById('hargaSekarang').value = '';
-    document.getElementById('jumlahKoin').value = '';
-    document.getElementById('jumlahUSD').value = '';
+    document.getElementById('jumlahInvestasi').value = '';
+    document.getElementById('hargaSekarangText').textContent = '-';
+    document.getElementById('priceChange').classList.add('hidden');
     document.getElementById('hasil').classList.add('hidden');
+    
+    currentPrice = 0;
+    priceChange24h = 0;
 }
