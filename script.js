@@ -1,86 +1,83 @@
-// Mapping cryptocurrency IDs untuk CoinGecko API
-const cryptoMap = {
-    'bitcoin': { symbol: 'BTC', name: 'Bitcoin' },
-    'ethereum': { symbol: 'ETH', name: 'Ethereum' },
-    'binancecoin': { symbol: 'BNB', name: 'Binance Coin' },
-    'ripple': { symbol: 'XRP', name: 'Ripple' },
-    'solana': { symbol: 'SOL', name: 'Solana' },
-    'litecoin': { symbol: 'LTC', name: 'Litecoin' },
-    'tron': { symbol: 'TRX', name: 'Tron' },
-    'dash': { symbol: 'DASH', name: 'Dash' },
-    'tellor': { symbol: 'TRB', name: 'Tellor' }
-};
+// ... (kode sebelumnya tetap) ...
 
-let currentPrice = 0;
-let priceChange24h = 0;
+// Fungsi untuk menampilkan modal hasil
+function showResultModal(cryptoName, cryptoPrice, profitData) {
+    const modal = document.getElementById('resultModal');
+    const cryptoInfo = cryptoMap[cryptoName];
+    
+    // Update konten modal
+    document.getElementById('modalCryptoName').textContent = `${cryptoInfo.name} (${cryptoInfo.symbol})`;
+    document.getElementById('modalCryptoPrice').textContent = `Harga Sekarang: $${cryptoPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    
+    // Update hasil perhitungan
+    document.getElementById('modalProfitPercentage').textContent = `${profitData.percentage.toFixed(2)}%`;
+    document.getElementById('modalProfitNominal').textContent = `$${profitData.nominal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('modalTotalNilai').textContent = `$${profitData.totalNilai.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('modalModalAwal').textContent = `$${profitData.modalAwal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    document.getElementById('modalJumlahKoin').textContent = profitData.jumlahKoin.toFixed(8);
+    document.getElementById('modalHargaBeli').textContent = `$${profitData.hargaBeli.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    document.getElementById('modalHargaSekarang').textContent = `$${profitData.hargaSekarang.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    
+    // Set status dan warna
+    const statusElement = document.getElementById('modalStatus');
+    const percentageElement = document.getElementById('modalProfitPercentage');
+    const nominalElement = document.getElementById('modalProfitNominal');
+    
+    // Reset classes
+    statusElement.className = 'value-modal';
+    percentageElement.className = 'value-modal';
+    nominalElement.className = 'value-modal';
+    
+    if (profitData.percentage > 0) {
+        statusElement.textContent = 'PROFIT 🎉';
+        statusElement.className += ' profit';
+        percentageElement.className += ' profit';
+        nominalElement.className += ' profit';
+    } else if (profitData.percentage < 0) {
+        statusElement.textContent = 'LOSS 📉';
+        statusElement.className += ' loss';
+        percentageElement.className += ' loss';
+        nominalElement.className += ' loss';
+    } else {
+        statusElement.textContent = 'BREAK EVEN ➖';
+        statusElement.className += ' neutral';
+    }
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+}
 
-// Fungsi untuk mendapatkan harga real-time dari CoinGecko
-async function getCurrentPrice(cryptoId) {
-    try {
-        showLoading(true);
-        const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoId}&vs_currencies=usd&include_24hr_change=true`);
-        
-        if (!response.ok) {
-            throw new Error('Gagal mengambil data harga');
-        }
-        
-        const data = await response.json();
-        
-        // Debug: lihat response dari API
-        console.log('API Response:', data);
-        
-        if (!data[cryptoId]) {
-            throw new Error(`Data untuk ${cryptoId} tidak ditemukan`);
-        }
-        
-        const price = data[cryptoId].usd;
-        const change = data[cryptoId].usd_24h_change || 0;
-        
-        showLoading(false);
-        return { price, change };
-    } catch (error) {
-        showLoading(false);
-        console.error('Error:', error);
-        alert('Gagal mengambil data harga. Silakan coba lagi atau pilih crypto lain.');
-        return null;
+// Fungsi untuk menutup modal
+function closeModal() {
+    const modal = document.getElementById('resultModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto'; // Enable scrolling again
+}
+
+// Fungsi untuk share result (opsional)
+function shareResult() {
+    const cryptoName = document.getElementById('modalCryptoName').textContent;
+    const profitPercentage = document.getElementById('modalProfitPercentage').textContent;
+    const profitNominal = document.getElementById('modalProfitNominal').textContent;
+    
+    const shareText = `📊 Hasil Perhitungan Crypto:\n${cryptoName}\nProfit: ${profitPercentage} (${profitNominal})\n\nHitung di: ${window.location.href}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Crypto Profit Calculator',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        // Fallback untuk browser yang tidak support Web Share API
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert('Hasil telah disalin ke clipboard! 📋');
+        });
     }
 }
 
-// Fungsi untuk update harga saat cryptocurrency dipilih
-async function updateHargaSekarang() {
-    const cryptoSelect = document.getElementById('cryptoSelect');
-    const selectedCrypto = cryptoSelect.value;
-    
-    if (!selectedCrypto) {
-        alert('Silakan pilih cryptocurrency terlebih dahulu!');
-        return;
-    }
-    
-    const priceData = await getCurrentPrice(selectedCrypto);
-    
-    if (priceData) {
-        currentPrice = priceData.price;
-        priceChange24h = priceData.change;
-        
-        // Update tampilan harga
-        document.getElementById('hargaSekarangText').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
-        
-        // Update price change
-        const priceChangeElement = document.getElementById('priceChange');
-        if (priceChange24h !== undefined && priceChange24h !== null) {
-            priceChangeElement.textContent = `(${priceChange24h >= 0 ? '+' : ''}${priceChange24h.toFixed(2)}%)`;
-            priceChangeElement.className = priceChange24h >= 0 ? 'positive' : 'negative';
-            priceChangeElement.classList.remove('hidden');
-        } else {
-            priceChangeElement.classList.add('hidden');
-        }
-        
-        // Auto-focus ke input harga beli setelah harga didapat
-        document.getElementById('hargaBeli').focus();
-    }
-}
-
-// Fungsi utama hitung profit
+// Fungsi utama hitung profit (diupdate)
 async function hitungProfit() {
     const cryptoSelect = document.getElementById('cryptoSelect').value;
     const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
@@ -117,89 +114,39 @@ async function hitungProfit() {
     const totalNilai = currentPrice * jumlahKoin;
     const modalAwal = hargaBeli * jumlahKoin;
 
-    // Tampilkan hasil
-    document.getElementById('profitPercentage').textContent = `${profitPercentage.toFixed(2)}%`;
-    document.getElementById('profitNominal').textContent = `$${profitNominal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('totalNilai').textContent = `$${totalNilai.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('modalAwal').textContent = `$${modalAwal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('jumlahKoinDimiliki').textContent = jumlahKoin.toFixed(8);
-    document.getElementById('hargaBeliDisplay').textContent = `$${hargaBeli.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
-    document.getElementById('hargaSekarangDisplay').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    // Siapkan data untuk modal
+    const profitData = {
+        percentage: profitPercentage,
+        nominal: profitNominal,
+        totalNilai: totalNilai,
+        modalAwal: modalAwal,
+        jumlahKoin: jumlahKoin,
+        hargaBeli: hargaBeli,
+        hargaSekarang: currentPrice
+    };
 
-    // Tentukan status dan warna
-    const statusElement = document.getElementById('status');
-    const percentageElement = document.getElementById('profitPercentage');
-    const nominalElement = document.getElementById('profitNominal');
-
-    // Reset kelas
-    percentageElement.className = 'value';
-    nominalElement.className = 'value';
-    statusElement.className = 'value';
-
-    if (profitPercentage > 0) {
-        statusElement.textContent = 'PROFIT 🎉';
-        statusElement.className += ' profit';
-        percentageElement.className += ' profit';
-        nominalElement.className += ' profit';
-    } else if (profitPercentage < 0) {
-        statusElement.textContent = 'LOSS 📉';
-        statusElement.className += ' loss';
-        percentageElement.className += ' loss';
-        nominalElement.className += ' loss';
-    } else {
-        statusElement.textContent = 'BREAK EVEN ➖';
-        statusElement.className += ' neutral';
-    }
-
-    // Tampilkan hasil
-    document.getElementById('hasil').classList.remove('hidden');
-
-    // Scroll ke hasil
-    document.getElementById('hasil').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
-    });
+    // Tampilkan modal popup
+    showResultModal(cryptoSelect, currentPrice, profitData);
 }
 
-// Fungsi untuk menampilkan/menyembunyikan loading
-function showLoading(show) {
-    const loadingElement = document.getElementById('loading');
-    if (show) {
-        loadingElement.classList.remove('hidden');
-    } else {
-        loadingElement.classList.add('hidden');
-    }
-}
+// ... (kode lainnya tetap sama) ...
 
-// Event listener ketika halaman dimuat
+// Close modal ketika klik di luar konten
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto update harga ketika cryptocurrency dipilih
-    document.getElementById('cryptoSelect').addEventListener('change', function() {
-        if (this.value) {
-            updateHargaSekarang();
+    const modal = document.getElementById('resultModal');
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
         }
     });
-
-    // Enter key support
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                hitungProfit();
-            }
-        });
-    });
-});
-
-// Fungsi untuk reset form
-function resetForm() {
-    document.getElementById('cryptoSelect').value = '';
-    document.getElementById('hargaBeli').value = '';
-    document.getElementById('jumlahInvestasi').value = '';
-    document.getElementById('hargaSekarangText').textContent = '-';
-    document.getElementById('priceChange').classList.add('hidden');
-    document.getElementById('hasil').classList.add('hidden');
     
-    currentPrice = 0;
-    priceChange24h = 0;
-}
+    // Close modal dengan ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+    
+    // ... (event listener lainnya) ...
+});
