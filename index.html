@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Crypto Profit Calculator</h1>
+        <h1>🪙 Crypto Profit Calculator</h1>
         <p>Hitung profit/loss investasi cryptocurrency Anda</p>
         
         <div class="calculator">
@@ -28,7 +28,6 @@
                 </select>
             </div>
 
-            <!-- Bagian input lainnya tetap sama -->
             <div class="input-group">
                 <label for="hargaBeli">Harga Beli per Koin (USD):</label>
                 <input type="number" id="hargaBeli" placeholder="Masukkan harga beli per koin">
@@ -50,53 +49,11 @@
                 </button>
             </div>
 
-            <button onclick="hitungProfit()">Hitung Profit/Loss</button>
+            <button onclick="hitungProfit()" class="calculate-btn">Hitung Profit/Loss</button>
             <button onclick="resetForm()" class="reset-btn">Reset</button>
 
             <div id="loading" class="loading hidden">
                 <p>🔄 Mengambil data harga terbaru...</p>
-            </div>
-
-            <div id="hasil" class="result hidden">
-                <h3>📊 Hasil Perhitungan:</h3>
-                <div class="result-grid">
-                    <div class="result-card">
-                        <h4>Profit/Loss Percentage</h4>
-                        <span id="profitPercentage" class="value">0%</span>
-                    </div>
-                    <div class="result-card">
-                        <h4>Profit/Loss Nominal</h4>
-                        <span id="profitNominal" class="value">$0</span>
-                    </div>
-                    <div class="result-card">
-                        <h4>Total Nilai Sekarang</h4>
-                        <span id="totalNilai" class="value">$0</span>
-                    </div>
-                    <div class="result-card">
-                        <h4>Status</h4>
-                        <span id="status" class="value">-</span>
-                    </div>
-                </div>
-                
-                <div class="breakdown">
-                    <h4>📈 Detail Investasi:</h4>
-                    <div class="breakdown-item">
-                        <span>Modal Awal:</span>
-                        <span id="modalAwal">$0</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span>Jumlah Koin yang Dimiliki:</span>
-                        <span id="jumlahKoinDimiliki">0</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span>Harga Beli per Koin:</span>
-                        <span id="hargaBeliDisplay">$0</span>
-                    </div>
-                    <div class="breakdown-item">
-                        <span>Harga Sekarang per Koin:</span>
-                        <span id="hargaSekarangDisplay">$0</span>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -138,6 +95,84 @@
                 <div class="info-card">
                     <h4>TRB</h4>
                     <p>Tellor - Oracle for decentralized data</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Popup untuk Hasil -->
+    <div id="resultModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Hasil Perhitungan Profit/Loss</h2>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="crypto-summary">
+                    <div id="modalCryptoIcon" class="crypto-icon">🪙</div>
+                    <div class="crypto-details">
+                        <h3 id="modalCryptoName">-</h3>
+                        <p id="modalCryptoPrice">Harga Sekarang: -</p>
+                    </div>
+                </div>
+
+                <div class="result-grid-modal">
+                    <div class="result-card-modal">
+                        <div class="result-icon">📈</div>
+                        <div class="result-text">
+                            <h4>Profit/Loss Percentage</h4>
+                            <span id="modalProfitPercentage" class="value-modal">0%</span>
+                        </div>
+                    </div>
+                    <div class="result-card-modal">
+                        <div class="result-icon">💰</div>
+                        <div class="result-text">
+                            <h4>Profit/Loss Nominal</h4>
+                            <span id="modalProfitNominal" class="value-modal">$0</span>
+                        </div>
+                    </div>
+                    <div class="result-card-modal">
+                        <div class="result-icon">💵</div>
+                        <div class="result-text">
+                            <h4>Total Nilai Sekarang</h4>
+                            <span id="modalTotalNilai" class="value-modal">$0</span>
+                        </div>
+                    </div>
+                    <div class="result-card-modal">
+                        <div class="result-icon">🎯</div>
+                        <div class="result-text">
+                            <h4>Status</h4>
+                            <span id="modalStatus" class="value-modal">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="breakdown-modal">
+                    <h4>📈 Detail Investasi:</h4>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-item-modal">
+                            <span>Modal Awal:</span>
+                            <span id="modalModalAwal">$0</span>
+                        </div>
+                        <div class="breakdown-item-modal">
+                            <span>Jumlah Koin:</span>
+                            <span id="modalJumlahKoin">0</span>
+                        </div>
+                        <div class="breakdown-item-modal">
+                            <span>Harga Beli per Koin:</span>
+                            <span id="modalHargaBeli">$0</span>
+                        </div>
+                        <div class="breakdown-item-modal">
+                            <span>Harga Sekarang per Koin:</span>
+                            <span id="modalHargaSekarang">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button onclick="closeModal()" class="modal-close-btn">Tutup</button>
+                    <button onclick="shareResult()" class="modal-share-btn">📤 Share Result</button>
                 </div>
             </div>
         </div>
